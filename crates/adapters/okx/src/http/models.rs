@@ -967,6 +967,7 @@ mod tests {
             close_position: None,
             tag: None,
             reduce_only: None,
+            close_fraction: None,
             callback_ratio: None,
             callback_spread: None,
             active_px: None,
@@ -987,6 +988,36 @@ mod tests {
         assert!(!json.contains("tgtCcy"));
         assert!(!json.contains("posSide"));
         assert!(!json.contains("closePosition"));
+        assert!(!json.contains("closeFraction"));
+    }
+
+    #[rstest]
+    fn test_algo_order_request_serializes_close_fraction() {
+        let request = OKXPlaceAlgoOrderRequest {
+            inst_id: "ETH-USDT-SWAP".to_string(),
+            inst_id_code: None,
+            td_mode: OKXTradeMode::Isolated,
+            side: OKXSide::Sell,
+            ord_type: OKXAlgoOrderType::Trigger,
+            sz: "0.01".to_string(),
+            algo_cl_ord_id: Some("close-frac-123".to_string()),
+            trigger_px: Some("3000".to_string()),
+            order_px: Some("-1".to_string()),
+            trigger_px_type: Some(OKXTriggerType::Last),
+            tgt_ccy: None,
+            pos_side: None,
+            close_position: None,
+            tag: None,
+            reduce_only: Some(true),
+            close_fraction: Some("1".to_string()),
+            callback_ratio: None,
+            callback_spread: None,
+            active_px: None,
+        };
+
+        let json = serde_json::to_string(&request).unwrap();
+
+        assert!(json.contains("\"closeFraction\":\"1\""));
     }
 
     #[rstest]
@@ -1007,6 +1038,7 @@ mod tests {
             close_position: None,
             tag: None,
             reduce_only: Some(true),
+            close_fraction: None,
             callback_ratio: None,
             callback_spread: None,
             active_px: None,
@@ -1135,6 +1167,7 @@ mod tests {
             close_position: None,
             tag: None,
             reduce_only: None,
+            close_fraction: None,
             callback_ratio: Some("0.01".to_string()),
             callback_spread: None,
             active_px: None,
@@ -1166,6 +1199,7 @@ mod tests {
             close_position: None,
             tag: None,
             reduce_only: Some(true),
+            close_fraction: None,
             callback_ratio: None,
             callback_spread: Some("50.5".to_string()),
             active_px: None,
@@ -1196,6 +1230,7 @@ mod tests {
             close_position: None,
             tag: None,
             reduce_only: None,
+            close_fraction: None,
             callback_ratio: Some("0.005".to_string()),
             callback_spread: None,
             active_px: Some("65000".to_string()),
