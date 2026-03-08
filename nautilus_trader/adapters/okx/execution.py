@@ -1082,6 +1082,22 @@ class OKXExecutionClient(LiveExecutionClient):
                 ts_event=self._clock.timestamp_ns(),
             )
 
+    def _normalize_close_fraction(self, command: SubmitOrder) -> str | None:
+        close_fraction = command.params.get("close_fraction") if command.params else None
+
+        if close_fraction is None:
+            return None
+        if isinstance(close_fraction, str):
+            return close_fraction
+        if isinstance(close_fraction, bool):
+            raise ValueError("OKX close_fraction must be a str, int, or float, not bool")
+        if isinstance(close_fraction, int | float):
+            return str(close_fraction)
+
+        raise ValueError(
+            f"OKX close_fraction must be a str, int, or float, got {type(close_fraction).__name__}",
+        )
+
     async def _submit_algo_order_http(self, command: SubmitOrder) -> None:
         order = command.order
 
@@ -1138,6 +1154,7 @@ class OKXExecutionClient(LiveExecutionClient):
                 )
 
         td_mode = self._get_trade_mode_for_order(order.instrument_id, command.params)
+        close_fraction = self._normalize_close_fraction(command)
 
         try:
             # Generate OrderSubmitted event here to ensure correct event sequencing
@@ -1161,6 +1178,7 @@ class OKXExecutionClient(LiveExecutionClient):
                 trigger_type=pyo3_trigger_type,
                 limit_price=pyo3_limit_price,
                 reduce_only=order.is_reduce_only or None,
+                close_fraction=close_fraction,
                 callback_ratio=callback_ratio,
                 callback_spread=callback_spread,
                 activation_price=pyo3_activation_price,
