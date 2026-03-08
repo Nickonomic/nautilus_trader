@@ -901,6 +901,56 @@ async def test_cancel_all_orders_handles_mixed_regular_and_algo_orders(
 
 
 @pytest.mark.asyncio
+async def test_submit_close_fraction_algo_order_forwards_param(
+    exec_client_builder,
+    monkeypatch,
+    instrument,
+):
+    # Arrange
+    client, _, _, http_client, _ = exec_client_builder(
+        monkeypatch,
+        config_kwargs={"instrument_types": (nautilus_pyo3.OKXInstrumentType.SWAP,)},
+    )
+    client._cache.add_instrument(instrument)
+    http_client.place_algo_order = AsyncMock(return_value={"algo_id": "algo-123", "s_code": "0"})
+
+    order = StopMarketOrder(
+        trader_id=TestIdStubs.trader_id(),
+        strategy_id=TestIdStubs.strategy_id(),
+        instrument_id=instrument.id,
+        client_order_id=ClientOrderId("O-close-fraction"),
+        order_side=OrderSide.SELL,
+        quantity=Quantity.from_str("0.010000"),
+        trigger_price=Price.from_str("40000.00"),
+        trigger_type=TriggerType.DEFAULT,
+        time_in_force=TimeInForce.GTC,
+        expire_time_ns=0,
+        init_id=TestIdStubs.uuid(),
+        ts_init=0,
+    )
+
+    from nautilus_trader.execution.messages import SubmitOrder
+
+    command = SubmitOrder(
+        trader_id=TestIdStubs.trader_id(),
+        strategy_id=TestIdStubs.strategy_id(),
+        order=order,
+        position_id=None,
+        command_id=TestIdStubs.uuid(),
+        ts_init=0,
+        params={"close_fraction": "1"},
+    )
+
+    # Act
+    await client._submit_order(command)
+
+    # Assert
+    http_client.place_algo_order.assert_awaited_once()
+    call = http_client.place_algo_order.await_args
+    assert call.kwargs["close_fraction"] == "1"
+
+
+@pytest.mark.asyncio
 async def test_spot_margin_market_buy_denies_order_without_quote_quantity(
     exec_client_builder,
     monkeypatch,
