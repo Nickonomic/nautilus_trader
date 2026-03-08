@@ -786,6 +786,9 @@ pub struct OKXPlaceAlgoOrderRequest {
     /// Whether it's a reduce-only order.
     #[serde(rename = "reduceOnly", skip_serializing_if = "Option::is_none")]
     pub reduce_only: Option<bool>,
+    /// Fraction of the position to close for eligible algo close orders.
+    #[serde(rename = "closeFraction", skip_serializing_if = "Option::is_none")]
+    pub close_fraction: Option<String>,
     /// Callback rate for trailing stop (e.g., "0.01" for 1%). Either this or
     /// `callback_spread` is required for `move_order_stop` orders.
     #[serde(rename = "callbackRatio", skip_serializing_if = "Option::is_none")]

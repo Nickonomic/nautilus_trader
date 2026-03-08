@@ -383,6 +383,7 @@ impl OKXExecutionClient {
                     trigger_type,
                     price,
                     Some(is_reduce_only),
+                    None,
                     callback_ratio,
                     callback_spread,
                     activation_price,
