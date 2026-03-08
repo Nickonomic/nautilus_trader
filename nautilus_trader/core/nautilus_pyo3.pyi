@@ -7924,6 +7924,7 @@ class OKXHttpClient:
         trigger_type: TriggerType | None = None,
         limit_price: Price | None = None,
         reduce_only: bool | None = None,
+        close_fraction: str | None = None,
         callback_ratio: str | None = None,
         callback_spread: str | None = None,
         activation_price: Price | None = None,
